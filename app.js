@@ -17,6 +17,9 @@ const form = document.querySelector('#reference-form');
 const input = document.querySelector('#reference');
 const bookSuggestions = document.querySelector('#book-suggestions');
 const bibleVersion = document.querySelector('#bible-version');
+const versionTrigger = document.querySelector('#bible-version-trigger');
+const versionTriggerText = document.querySelector('#bible-version-text');
+const versionOptions = document.querySelector('#bible-version-options');
 const status = document.querySelector('#status');
 const searchButton = document.querySelector('#search-button');
 const card = document.querySelector('#verse-card');
@@ -26,6 +29,9 @@ const versionEl = document.querySelector('#verse-version');
 const bg = document.querySelector('#background-color');
 const fg = document.querySelector('#text-color');
 const fontFamily = document.querySelector('#font-family');
+const fontTrigger = document.querySelector('#font-family-trigger');
+const fontTriggerText = document.querySelector('#font-family-text');
+const fontOptions = document.querySelector('#font-family-options');
 const transparent = document.querySelector('#transparent-bg');
 const dots = document.querySelector('#slide-dots');
 const previousButton = document.querySelector('#previous-slide');
@@ -39,6 +45,11 @@ let currentSlide = 0;
 let spanishTranslations = [];
 let matchingBooks = [];
 let activeSuggestion = -1;
+
+const FONT_OPTIONS = [
+  { id: 'manrope', label: 'Manrope · minimalista' },
+  { id: 'cormorant', label: 'Cormorant · clásica' }
+];
 
 const normalize = value => value.trim().toLocaleLowerCase('es').replace(/\s+/g, ' ');
 
@@ -93,6 +104,61 @@ function setActiveSuggestion(index) {
   input.setAttribute('aria-activedescendant', `book-suggestion-${activeSuggestion}`);
 }
 
+function closeVersionOptions() {
+  versionOptions.hidden = true;
+  versionTrigger.setAttribute('aria-expanded', 'false');
+}
+
+async function chooseTranslation(id, refreshPassage = false) {
+  bibleVersion.value = id;
+  const translation = selectedTranslation();
+  if (!translation) return;
+  versionTriggerText.textContent = `${translation.shortName} · ${translation.name}`;
+  versionEl.textContent = translation.shortName.toUpperCase();
+  versionOptions.querySelectorAll('.version-option').forEach(option => {
+    const isActive = option.dataset.translationId === id;
+    option.classList.toggle('is-active', isActive);
+    option.setAttribute('aria-selected', String(isActive));
+  });
+  closeVersionOptions();
+  if (refreshPassage) await search();
+}
+
+function closeFontOptions() {
+  fontOptions.hidden = true;
+  fontTrigger.setAttribute('aria-expanded', 'false');
+}
+
+function chooseFont(id) {
+  const font = FONT_OPTIONS.find(option => option.id === id);
+  if (!font) return;
+  fontFamily.value = font.id;
+  fontTriggerText.textContent = font.label;
+  fontOptions.querySelectorAll('.font-option').forEach(option => {
+    const isActive = option.dataset.fontId === id;
+    option.classList.toggle('is-active', isActive);
+    option.setAttribute('aria-selected', String(isActive));
+  });
+  closeFontOptions();
+  updateAppearance();
+}
+
+function renderFontOptions() {
+  fontOptions.innerHTML = '';
+  FONT_OPTIONS.forEach(font => {
+    const option = document.createElement('button');
+    option.type = 'button';
+    option.className = 'font-option';
+    option.dataset.fontId = font.id;
+    option.setAttribute('role', 'option');
+    option.classList.toggle('is-active', font.id === fontFamily.value);
+    option.setAttribute('aria-selected', String(font.id === fontFamily.value));
+    option.textContent = font.label;
+    option.addEventListener('click', () => chooseFont(font.id));
+    fontOptions.append(option);
+  });
+}
+
 function parseReference(value) {
   const match = value.trim().match(/^(.+?)\s+(\d+)(?:\s*:\s*(.+))?\s*$/);
   if (!match) throw new Error('Usa un formato como: Mateo 12, Mateo 12:1-3 o Mateo 12:1,5-8.');
@@ -141,16 +207,28 @@ async function loadTranslations() {
       .sort((a, b) => a.name.localeCompare(b.name, 'es'));
     if (!spanishTranslations.length) throw new Error();
     bibleVersion.innerHTML = '';
+    versionOptions.innerHTML = '';
     spanishTranslations.forEach(translation => {
       const option = document.createElement('option');
       option.value = translation.id;
       option.textContent = `${translation.shortName} · ${translation.name}`;
       bibleVersion.append(option);
+
+      const optionButton = document.createElement('button');
+      optionButton.type = 'button';
+      optionButton.className = 'version-option';
+      optionButton.dataset.translationId = translation.id;
+      optionButton.setAttribute('role', 'option');
+      optionButton.textContent = `${translation.shortName} · ${translation.name}`;
+      optionButton.addEventListener('click', () => chooseTranslation(translation.id, true));
+      versionOptions.append(optionButton);
     });
     const preferred = spanishTranslations.find(translation => translation.id === 'spa_rvg') || spanishTranslations[0];
     bibleVersion.value = preferred.id;
     versionEl.textContent = preferred.shortName.toUpperCase();
     bibleVersion.disabled = false;
+    versionTrigger.disabled = false;
+    chooseTranslation(preferred.id);
     setStatus('Cargando Mateo 5:3–12…');
     await search();
   } catch {
@@ -267,7 +345,9 @@ function showSlide(index) {
 function updateAppearance() {
   card.style.backgroundColor = transparent.checked ? 'transparent' : bg.value;
   textEl.style.color = fg.value;
-  card.style.setProperty('--verse-font', fontFamily.value === 'cormorant' ? 'Cormorant Garamond, Georgia, serif' : 'Manrope, Avenir, sans-serif');
+  const verseFont = fontFamily.value === 'cormorant' ? 'Cormorant Garamond, Georgia, serif' : 'Manrope, Avenir, sans-serif';
+  card.style.setProperty('--verse-font', verseFont);
+  [refEl, textEl, versionEl].forEach(element => { element.style.fontFamily = verseFont; });
   textEl.style.fontWeight = fontFamily.value === 'cormorant' ? '500' : '300';
   card.style.boxShadow = transparent.checked ? 'none' : '';
   showSlide(currentSlide);
@@ -396,16 +476,36 @@ input.addEventListener('keydown', event => {
 });
 document.addEventListener('pointerdown', event => {
   if (!event.target.closest('.reference-autocomplete')) closeBookSuggestions();
+  if (!event.target.closest('.version-picker')) closeVersionOptions();
+  if (!event.target.closest('.font-picker')) closeFontOptions();
+});
+versionTrigger.addEventListener('click', () => {
+  if (versionTrigger.disabled) return;
+  const willOpen = versionOptions.hidden;
+  versionOptions.hidden = !willOpen;
+  versionTrigger.setAttribute('aria-expanded', String(willOpen));
+});
+versionTrigger.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeVersionOptions();
+});
+fontTrigger.addEventListener('click', () => {
+  const willOpen = fontOptions.hidden;
+  fontOptions.hidden = !willOpen;
+  fontTrigger.setAttribute('aria-expanded', String(willOpen));
+});
+fontTrigger.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeFontOptions();
 });
 [bg, fg, fontFamily, transparent].forEach(control => control.addEventListener('input', updateAppearance));
 bibleVersion.addEventListener('change', () => {
   const translation = selectedTranslation();
-  if (translation) versionEl.textContent = translation.shortName.toUpperCase();
+  if (translation) chooseTranslation(translation.id, true);
 });
 previousButton.addEventListener('click', () => { showSlide(currentSlide - 1); });
 nextButton.addEventListener('click', () => { showSlide(currentSlide + 1); });
 downloadButton.addEventListener('click', downloadPngs);
 downloadPptButton.addEventListener('click', downloadPptx);
 window.addEventListener('resize', () => { showSlide(currentSlide); });
+renderFontOptions();
 updateAppearance(); showSlide(0);
 loadTranslations();
