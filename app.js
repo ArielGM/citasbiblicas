@@ -401,7 +401,7 @@ async function downloadPngs() {
       link.href = URL.createObjectURL(blob); link.click();
       setTimeout(() => URL.revokeObjectURL(link.href), 1000);
     }
-    setStatus(`${slides.length} PNG${slides.length === 1 ? '' : 's'} descargado${slides.length === 1 ? '' : 's'}. Ya puedes agregarlos como imágenes en vMix.`, 'success');
+    setStatus(`${slides.length} PNG${slides.length === 1 ? '' : 's'} descargado${slides.length === 1 ? '' : 's'}. Ya puedes agregarlos como imágenes en tu presentación.`, 'success');
   } catch {
     setStatus('No se pudieron generar todos los PNG. Inténtalo nuevamente.', 'error');
   } finally {
@@ -432,7 +432,7 @@ async function downloadPptx() {
     pptx.layout = 'LAYOUT_WIDE';
     pptx.author = 'Pasaje a PNG';
     pptx.subject = `Pasajes bíblicos ${selectedTranslation()?.name || ''}`.trim();
-    pptx.title = 'Pasajes bíblicos para vMix';
+    pptx.title = 'Pasajes bíblicos para presentación';
     pptx.lang = 'es-CL';
 
     for (let index = 0; index < slides.length; index += 1) {
