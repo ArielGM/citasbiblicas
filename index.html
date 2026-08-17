@@ -1,0 +1,83 @@
+<!--
+THESIS: Un control de cabina convierte una referencia en una lámina de proyección, sin pantallas ni pasos extra.
+OWN-WORLD: Azul de sala oscura, ámbar de señal y una lámina negra que habla el lenguaje de una salida de video.
+STORY: El operador ingresa una cita, confirma el texto y descarga su PNG para vMix.
+FIRST VIEWPORT: Formulario compacto a la izquierda y la lámina exportable a la derecha, con la acción principal siempre visible.
+FORM: Herramienta operativa de dos paneles; la previsualización es la pieza central.
+-->
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Consulta pasajes Reina-Valera 1909 y descárgalos como PNG para vMix." />
+    <title>Pasaje a PNG</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-label="Generador de pasajes">
+        <aside class="controls-panel">
+          <header class="topbar">
+            <div class="brand"><span>TU REFERENCIA PARA PRESENTACIÓN</span></div>
+          </header>
+          <form id="reference-form">
+            <label class="sr-only" for="reference">Referencia bíblica</label>
+            <div class="input-row">
+              <div class="reference-autocomplete">
+                <input id="reference" name="reference" type="text" value="Mateo 5:3-12" autocomplete="off" spellcheck="false" aria-describedby="reference-help" aria-autocomplete="list" aria-controls="book-suggestions" aria-expanded="false" />
+                <div id="book-suggestions" class="book-suggestions" role="listbox" aria-label="Libros bíblicos sugeridos" hidden></div>
+              </div>
+              <button type="submit" id="search-button">Buscar</button>
+            </div>
+            <p id="reference-help" class="help">Ejemplos: Mateo 12 · Mateo 12:1 · Mateo 12:1-3 · Mateo 12:1,5-8 · Mateo 12:3,4 y 7.</p>
+            <label class="version-field" for="bible-version">Versión bíblica
+              <select id="bible-version" disabled>
+                <option>Cargando versiones en español…</option>
+              </select>
+            </label>
+          </form>
+
+          <div class="appearance" aria-label="Personalización de la lámina">
+            <label class="color-field" for="background-color">Fondo <input id="background-color" type="color" value="#05070b" /></label>
+            <label class="color-field" for="text-color">Texto <input id="text-color" type="color" value="#ffffff" /></label>
+            <label class="font-field" for="font-family">Tipografía
+              <select id="font-family">
+                <option value="manrope">Manrope · minimalista</option>
+                <option value="cormorant">Cormorant · clásica</option>
+              </select>
+            </label>
+            <label class="toggle"><input id="transparent-bg" type="checkbox" /> Fondo transparente</label>
+          </div>
+
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+        </aside>
+
+        <section class="preview-section" aria-label="Previsualización del pasaje">
+          <article id="verse-card" class="verse-card" aria-live="polite">
+            <div class="card-content">
+              <p id="verse-reference" class="verse-reference">Mateo 5:3–12</p>
+              <p id="verse-text" class="verse-text">Cargando pasaje…</p>
+              <p id="verse-version" class="verse-version">REINA-VALERA 1909</p>
+            </div>
+          </article>
+          <nav class="carousel-controls" aria-label="Navegación entre láminas">
+            <button id="previous-slide" class="carousel-button" type="button" aria-label="Lámina anterior">←</button>
+            <div id="slide-dots" class="slide-dots" aria-live="polite"></div>
+            <button id="next-slide" class="carousel-button" type="button" aria-label="Lámina siguiente">→</button>
+          </nav>
+          <button id="download-button" class="download-button" type="button">Descargar (1 PNG)</button>
+          <button id="download-ppt-button" class="ppt-button" type="button">Descargar PPTX (1 diapos.)</button>
+          <p id="download-note" class="sr-only"></p>
+        </section>
+      </section>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
