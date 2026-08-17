@@ -251,6 +251,23 @@ function buildReference(label, chapter, verses) {
 
 const MAX_CHARACTERS_PER_SLIDE = 210;
 
+function formatSlideText(group, { continuesFrom = false, continuesTo = false } = {}) {
+  const content = group.map((verse, index) => {
+    const omitVerseNumber = continuesFrom && index === 0;
+    return omitVerseNumber ? verse.t.trim() : `${verse.v}. ${verse.t.trim()}`;
+  }).join(' ');
+  return `${continuesFrom ? '…' : '“'}${content}${continuesTo ? '…' : '”'}`;
+}
+
+function createSlide(reference, group, continuity = {}) {
+  return {
+    reference: buildReference(reference.label, reference.chapter, group),
+    text: formatSlideText(group, continuity),
+    verseItems: group,
+    ...continuity
+  };
+}
+
 function makeSlides(verses, reference) {
   const groups = [];
   let group = [];
@@ -275,15 +292,13 @@ function makeSlides(verses, reference) {
 
   if (group.length) groups.push(group);
 
-  return groups.map(group => ({
-    reference: buildReference(reference.label, reference.chapter, group),
-    text: `“${group.map(verse => `${verse.v}. ${verse.t.trim()}`).join(' ')}”`,
-    verseItems: group
-  }));
+  return groups.map(group => createSlide(reference, group));
 }
 
 function fitText() {
-  const sizes = ['clamp(1.45rem, 2.7vw, 2.85rem)', 'clamp(1.25rem, 2.3vw, 2.4rem)', 'clamp(1.1rem, 2vw, 2rem)', 'clamp(.95rem, 1.6vw, 1.6rem)'];
+  const cardWidth = card.clientWidth || 640;
+  const sizes = [.047, .041, .036, .032, .028, .024]
+    .map(ratio => `${Math.max(10, Math.round(cardWidth * ratio))}px`);
   for (const size of sizes) {
     card.style.setProperty('--verse-size', size);
     if (textEl.scrollHeight <= textEl.clientHeight) return true;
@@ -311,16 +326,34 @@ function updateDownloadDetails() {
 
 function splitSlide(index) {
   const slide = slides[index];
-  const midpoint = Math.ceil(slide.verseItems.length / 2);
-  const groups = [slide.verseItems.slice(0, midpoint), slide.verseItems.slice(midpoint)];
   const match = slide.reference.match(/^(.*?)\s+(\d+):/);
-  if (!match || !groups[1].length) return false;
+  if (!match) return false;
   const reference = { label: match[1], chapter: Number(match[2]) };
-  slides.splice(index, 1, ...groups.map(group => ({
-    reference: buildReference(reference.label, reference.chapter, group),
-    text: `“${group.map(verse => `${verse.v}. ${verse.t.trim()}`).join(' ')}”`,
-    verseItems: group
-  })));
+
+  if (slide.verseItems.length === 1) {
+    const verse = slide.verseItems[0];
+    const words = verse.t.trim().split(/\s+/);
+    if (words.length < 8) return false;
+
+    const midpoint = Math.floor(words.length / 2);
+    const punctuationIndex = words.findIndex((word, wordIndex) =>
+      wordIndex >= midpoint - 3 && wordIndex <= midpoint + 3 && /[;,:.]$/.test(word)
+    );
+    const splitAt = punctuationIndex >= 0 ? punctuationIndex + 1 : midpoint;
+    const firstVerse = { ...verse, t: words.slice(0, splitAt).join(' ') };
+    const secondVerse = { ...verse, t: words.slice(splitAt).join(' ') };
+
+    slides.splice(index, 1,
+      createSlide(reference, [firstVerse], { continuesFrom: slide.continuesFrom, continuesTo: true }),
+      createSlide(reference, [secondVerse], { continuesFrom: true, continuesTo: slide.continuesTo })
+    );
+  } else {
+    const midpoint = Math.ceil(slide.verseItems.length / 2);
+    const groups = [slide.verseItems.slice(0, midpoint), slide.verseItems.slice(midpoint)];
+    if (!groups[1].length) return false;
+    slides.splice(index, 1, ...groups.map(group => createSlide(reference, group)));
+  }
+
   updateDownloadDetails();
   return true;
 }
@@ -334,7 +367,7 @@ function showSlide(index) {
   nextButton.disabled = currentSlide === slides.length - 1;
   renderDots();
   return new Promise(resolve => requestAnimationFrame(() => {
-    if (!fitText() && slide.verseItems.length > 1 && splitSlide(currentSlide)) {
+    if (!fitText() && splitSlide(currentSlide)) {
       showSlide(currentSlide).then(resolve);
       return;
     }
