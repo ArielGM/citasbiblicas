@@ -1,0 +1,39 @@
+<!--
+THESIS: La cita activa ocupa toda la pantalla y el control desaparece hasta que el operador lo necesita.
+OWN-WORLD: La misma señal ámbar y composición negra de las láminas del generador, sin interfaz auxiliar persistente.
+STORY: El operador abre esta salida, presenta la cita y avanza las láminas sin dejar la proyección.
+FIRST VIEWPORT: Una lámina 16:9 llena el visor; navegación mínima aparece únicamente al mover el puntero.
+FORM: Salida de proyección inmersiva; la lámina es la interfaz y los controles son una capa temporal.
+-->
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Salida de presentación para citas bíblicas." />
+    <title>Presentación | Citas Bíblicas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="output.css" />
+  </head>
+  <body>
+    <main class="presentation" aria-label="Presentación de cita bíblica">
+      <article id="output-card" class="output-card" aria-live="polite">
+        <div class="output-content">
+          <p id="output-reference" class="output-reference">Cita bíblica</p>
+          <p id="output-text" class="output-text">Abre esta vista desde el generador para presentar una cita.</p>
+          <p id="output-version" class="output-version"></p>
+        </div>
+      </article>
+    </main>
+
+    <nav id="presentation-controls" class="presentation-controls" aria-label="Controles de presentación">
+      <button id="output-previous" type="button" aria-label="Lámina anterior">&#8592;</button>
+      <span id="output-counter" aria-live="polite">0 / 0</span>
+      <button id="output-next" type="button" aria-label="Lámina siguiente">&#8594;</button>
+      <button id="output-fullscreen" type="button" aria-label="Alternar pantalla completa">&#9974;</button>
+    </nav>
+    <script src="output.js"></script>
+  </body>
+</html>

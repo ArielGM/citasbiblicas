@@ -38,13 +38,17 @@ const previousButton = document.querySelector('#previous-slide');
 const nextButton = document.querySelector('#next-slide');
 const downloadButton = document.querySelector('#download-button');
 const downloadPptButton = document.querySelector('#download-ppt-button');
+const downloadButtonLabel = document.querySelector('#download-button-label');
+const downloadPptButtonLabel = document.querySelector('#download-ppt-button-label');
 const downloadNote = document.querySelector('#download-note');
+const presentButton = document.querySelector('#present-button');
 
 let slides = [{ reference: 'Mateo 5:3–12', text: 'Cargando pasaje…', verseItems: [] }];
 let currentSlide = 0;
 let spanishTranslations = [];
 let matchingBooks = [];
 let activeSuggestion = -1;
+const presentationChannel = 'BroadcastChannel' in window ? new BroadcastChannel('citas-biblicas-presentacion') : null;
 
 const FONT_OPTIONS = [
   { id: 'manrope', label: 'Manrope · minimalista' },
@@ -52,6 +56,33 @@ const FONT_OPTIONS = [
 ];
 
 const normalize = value => value.trim().toLocaleLowerCase('es').replace(/\s+/g, ' ');
+
+function presentationState() {
+  return {
+    slides: slides.map(slide => ({ reference: slide.reference, text: slide.text })),
+    currentSlide,
+    appearance: {
+      background: bg.value,
+      text: fg.value,
+      transparent: transparent.checked,
+      font: fontFamily.value,
+      version: versionEl.textContent
+    }
+  };
+}
+
+function publishPresentationState() {
+  const state = presentationState();
+  try { localStorage.setItem('citas-biblicas-presentacion', JSON.stringify(state)); } catch { /* Storage can be unavailable in private contexts. */ }
+  presentationChannel?.postMessage(state);
+}
+
+function openPresentation() {
+  publishPresentationState();
+  const presentation = window.open('output.html', 'citas-biblicas-output');
+  if (presentation) presentation.focus();
+  else setStatus('El navegador bloqueÃ³ la ventana de presentaciÃ³n. Permite las ventanas emergentes e intÃ©ntalo nuevamente.', 'error');
+}
 
 function closeBookSuggestions() {
   matchingBooks = [];
@@ -319,8 +350,12 @@ function renderDots() {
 }
 
 function updateDownloadDetails() {
-  downloadButton.textContent = `Descargar (${slides.length} PNG)`;
-  downloadPptButton.textContent = `Descargar PPTX (${slides.length} diapos.)`;
+  const pngLabel = `Descargar (${slides.length} .png)`;
+  const pptxLabel = `Descargar .ppt`;
+  downloadButtonLabel.textContent = pngLabel;
+  downloadPptButtonLabel.textContent = pptxLabel;
+  downloadButton.setAttribute('aria-label', pngLabel);
+  downloadPptButton.setAttribute('aria-label', pptxLabel);
   downloadNote.textContent = `${slides.length} lámina${slides.length === 1 ? '' : 's'} preparada${slides.length === 1 ? '' : 's'}.`;
 }
 
@@ -371,6 +406,7 @@ function showSlide(index) {
       showSlide(currentSlide).then(resolve);
       return;
     }
+    publishPresentationState();
     resolve();
   }));
 }
@@ -423,10 +459,11 @@ async function exportSlide(index) {
 async function downloadPngs() {
   if (!window.html2canvas) { setStatus('No se pudo cargar el generador de PNG. Revisa tu conexión.', 'error'); return; }
   const selectedSlide = currentSlide;
-  downloadButton.disabled = true; downloadButton.textContent = 'Generando PNGs…';
+  downloadButton.disabled = true; downloadButtonLabel.textContent = 'Generando PNGs…'; downloadButton.setAttribute('aria-label', 'Generando PNGs…');
   try {
     for (let index = 0; index < slides.length; index += 1) {
-      downloadButton.textContent = `Generando ${index + 1} de ${slides.length}…`;
+      downloadButtonLabel.textContent = `Generando ${index + 1} de ${slides.length}…`;
+      downloadButton.setAttribute('aria-label', `Generando PNG ${index + 1} de ${slides.length}`);
       const blob = await exportSlide(index);
       const link = document.createElement('a');
       const versionId = selectedTranslation()?.shortName?.toLowerCase() || 'biblia';
@@ -459,17 +496,19 @@ async function downloadPptx() {
   }
   const selectedSlide = currentSlide;
   downloadPptButton.disabled = true;
-  downloadPptButton.textContent = 'Generando PPTX…';
+  downloadPptButtonLabel.textContent = 'Generando PPTX…';
+  downloadPptButton.setAttribute('aria-label', 'Generando PPTX…');
   try {
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
-    pptx.author = 'Pasaje a PNG';
+    pptx.author = 'AriLabs';
     pptx.subject = `Pasajes bíblicos ${selectedTranslation()?.name || ''}`.trim();
     pptx.title = 'Pasajes bíblicos para presentación';
     pptx.lang = 'es-CL';
 
     for (let index = 0; index < slides.length; index += 1) {
-      downloadPptButton.textContent = `Generando diapositiva ${index + 1} de ${slides.length}…`;
+      downloadPptButtonLabel.textContent = `Generando diapositiva ${index + 1} de ${slides.length}…`;
+      downloadPptButton.setAttribute('aria-label', `Generando diapositiva ${index + 1} de ${slides.length}`);
       const imageData = await blobToDataUrl(await exportSlide(index));
       const pptSlide = pptx.addSlide();
       pptSlide.background = { color: bg.value.replace('#', '') };
@@ -538,6 +577,7 @@ previousButton.addEventListener('click', () => { showSlide(currentSlide - 1); })
 nextButton.addEventListener('click', () => { showSlide(currentSlide + 1); });
 downloadButton.addEventListener('click', downloadPngs);
 downloadPptButton.addEventListener('click', downloadPptx);
+presentButton.addEventListener('click', openPresentation);
 window.addEventListener('resize', () => { showSlide(currentSlide); });
 renderFontOptions();
 updateAppearance(); showSlide(0);

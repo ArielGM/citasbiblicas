@@ -11,6 +11,7 @@ Agilizar la preparación de pasajes bíblicos para la proyección en iglesias: s
 - `index.html`: estructura de la interfaz y carga de las bibliotecas externas.
 - `styles.css`: diseño responsivo, colores, tipografías y formato visual de las láminas.
 - `app.js`: consulta bíblica, interpretación de referencias, agrupación de versículos, carrusel y exportaciones.
+- `output.html`, `output.css` y `output.js`: salida limpia para presentar en una segunda pestaña o en pantalla completa.
 - API bíblica: [Free Use Bible API](https://bible.helloao.org/docs/).
 - `html2canvas`: convierte cada lámina en PNG.
 - `PptxGenJS`: crea un archivo PPTX con una lámina por diapositiva.
@@ -23,6 +24,7 @@ Agilizar la preparación de pasajes bíblicos para la proyección en iglesias: s
 4. Selecciona la versión bíblica, colores, tipografía y, si es necesario, fondo transparente.
 5. Revisa las láminas con las flechas del carrusel.
 6. Descarga todas las imágenes con **Descargar (X PNG)** o crea una presentación con **Descargar PPTX (X diapos.)**.
+7. Para presentar directamente, presiona **Presentar en pantalla completa**. Se abrirá `output.html` con la lámina actual; usa las flechas del teclado o los controles discretos al mover el puntero. La cita permanece sincronizada con el generador mientras ambas pestañas están abiertas.
 
 ## Formatos de referencia admitidos
 

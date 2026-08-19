@@ -84,8 +84,17 @@ FORM: Herramienta operativa de dos paneles; la previsualización es la pieza cen
             <div id="slide-dots" class="slide-dots" aria-live="polite"></div>
             <button id="next-slide" class="carousel-button" type="button" aria-label="Lámina siguiente">→</button>
           </nav>
-          <button id="download-button" class="download-button" type="button">Descargar (1 PNG)</button>
-          <button id="download-ppt-button" class="ppt-button" type="button">Descargar PPTX (1 diapos.)</button>
+          <div class="export-actions" aria-label="Acciones de presentación y descarga">
+            <button id="download-button" class="download-button" type="button" aria-label="Descargar 1 PNG">
+              <span id="download-button-label" class="action-label">Descargar (1 .png)</span><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 15v4h14v-4" /></svg>
+            </button>
+            <button id="download-ppt-button" class="ppt-button" type="button" aria-label="Descargar PPTX con 1 diapositiva">
+              <span id="download-ppt-button-label" class="action-label">Descargar .ppt</span><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l4 4v16H6zM14 2v5h5M12 10v6m0 0 3-3m-3 3-3-3" /></svg>
+            </button>
+            <button id="present-button" class="present-button" type="button" aria-label="Presentar en pantalla completa">
+              <span class="action-label">Presentar</span><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" /></svg>
+            </button>
+          </div>
           <p id="download-note" class="sr-only"></p>
         </section>
       </section>
