@@ -48,6 +48,7 @@ let currentSlide = 0;
 let spanishTranslations = [];
 let matchingBooks = [];
 let activeSuggestion = -1;
+let presentationWindow = null;
 const presentationChannel = 'BroadcastChannel' in window ? new BroadcastChannel('citas-biblicas-presentacion') : null;
 
 const FONT_OPTIONS = [
@@ -87,6 +88,7 @@ function presentationWindowFeatures(display) {
 async function movePresentationToSecondaryDisplay(presentation) {
   try {
     const details = await window.getScreenDetails();
+    if (presentation.closed) return;
     const secondaryDisplay = details.screens.find(display => display !== details.currentScreen);
     if (!secondaryDisplay) {
       setStatus('Ventana de presentación abierta. No se detectó una segunda pantalla.', 'success');
@@ -97,24 +99,36 @@ async function movePresentationToSecondaryDisplay(presentation) {
     presentation.resizeTo(Math.round(secondaryDisplay.availWidth), Math.round(secondaryDisplay.availHeight));
     presentation.focus();
     setStatus('Salida enviada a la segunda pantalla. Usa el botón de pantalla completa si el navegador lo solicita.', 'success');
-  } catch {
-    setStatus('Ventana de presentación abierta. Permite administrar ventanas para enviarla automáticamente a la segunda pantalla.', 'success');
+  } catch (error) {
+    const message = error?.name === 'NotAllowedError'
+      ? 'Ventana de presentación abierta. Permite administrar ventanas para enviarla automáticamente a la segunda pantalla.'
+      : 'Ventana de presentación abierta. No fue posible detectar una segunda pantalla en este navegador.';
+    setStatus(message, 'success');
   }
 }
 
 function openPresentation() {
   publishPresentationState();
-  const presentation = window.open('output.html', 'citas-biblicas-output', presentationWindowFeatures());
+  const isOpen = presentationWindow && !presentationWindow.closed;
+  const presentation = isOpen
+    ? presentationWindow
+    : window.open('output.html', `citas-biblicas-output-${Date.now()}`, presentationWindowFeatures());
   if (!presentation) {
     setStatus('El navegador bloqueó la ventana de presentación. Permite las ventanas emergentes e inténtalo nuevamente.', 'error');
     return;
   }
 
+  presentationWindow = presentation;
   presentation.focus();
-  if (typeof window.getScreenDetails !== 'function') {
-    setStatus('Ventana de presentación abierta. Para enviarla automáticamente a otra pantalla usa Chrome o Edge en Windows.', 'success');
+  if (!window.isSecureContext) {
+    setStatus('Ventana de presentación abierta. La proyección automática entre pantallas requiere abrir la web desde HTTPS.', 'success');
     return;
   }
+  if (typeof window.getScreenDetails !== 'function') {
+    setStatus('Ventana de presentación abierta. La detección de segunda pantalla no está disponible en este navegador o versión de Edge.', 'success');
+    return;
+  }
+  setStatus('Solicitando permiso para detectar pantallas…');
   void movePresentationToSecondaryDisplay(presentation);
 }
 
