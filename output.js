@@ -73,6 +73,15 @@ async function toggleFullscreen() {
   else await document.documentElement.requestFullscreen?.();
 }
 
+function requestAutomaticFullscreen() {
+  const openInFullscreen = new URLSearchParams(window.location.search).get('fullscreen') === '1';
+  if (!openInFullscreen || document.fullscreenElement || !document.fullscreenEnabled) return;
+
+  document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {
+    // Algunos navegadores exigen una interacción dentro de esta ventana. El botón queda disponible como respaldo.
+  });
+}
+
 previous.addEventListener('click', () => navigate(-1));
 next.addEventListener('click', () => navigate(1));
 fullscreen.addEventListener('click', toggleFullscreen);
@@ -88,3 +97,4 @@ window.addEventListener('storage', event => {
 });
 channel?.addEventListener('message', event => applyState(event.data));
 applyState(readStoredState() || state);
+requestAutomaticFullscreen();

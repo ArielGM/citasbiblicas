@@ -82,7 +82,7 @@ function presentationWindowFeatures(display) {
   const width = Math.max(720, Math.round(display?.availWidth || 1280));
   const height = Math.max(480, Math.round(display?.availHeight || 720));
   const position = display ? `,left=${Math.round(display.availLeft)},top=${Math.round(display.availTop)}` : '';
-  return `popup=yes,resizable=yes,scrollbars=no,width=${width},height=${height}${position}`;
+  return `popup=yes,fullscreen=yes,resizable=yes,scrollbars=no,width=${width},height=${height}${position}`;
 }
 
 async function movePresentationToSecondaryDisplay(presentation) {
@@ -113,7 +113,7 @@ function openPresentation() {
   const isOpen = presentationWindow && !presentationWindow.closed;
   const presentation = isOpen
     ? presentationWindow
-    : window.open('output.html', `citas-biblicas-output-${Date.now()}`, presentationWindowFeatures());
+    : window.open('output.html?fullscreen=1', `citas-biblicas-output-${Date.now()}`, presentationWindowFeatures());
   if (!presentation) {
     setStatus('El navegador bloqueó la ventana de presentación. Permite las ventanas emergentes e inténtalo nuevamente.', 'error');
     return;
