@@ -89,21 +89,22 @@ async function movePresentationToSecondaryDisplay(presentation) {
   try {
     const details = await window.getScreenDetails();
     if (presentation.closed) return;
-    const secondaryDisplay = details.screens.find(display => display !== details.currentScreen);
+    const secondaryDisplay = details.screens.find(display => display !== details.currentScreen)
+      || details.screens.find(display => !display.isPrimary);
     if (!secondaryDisplay) {
-      setStatus('Ventana de presentación abierta. No se detectó una segunda pantalla.', 'success');
+      setStatus('Edge detecta una sola pantalla. En Windows presiona Win + P y selecciona “Extender”; luego vuelve a presentar.', 'error');
       return;
     }
 
     presentation.moveTo(Math.round(secondaryDisplay.availLeft), Math.round(secondaryDisplay.availTop));
     presentation.resizeTo(Math.round(secondaryDisplay.availWidth), Math.round(secondaryDisplay.availHeight));
     presentation.focus();
-    setStatus('Salida enviada a la segunda pantalla. Usa el botón de pantalla completa si el navegador lo solicita.', 'success');
+    setStatus('Salida enviada a la segunda pantalla. Usa pantalla completa en esa ventana si Edge lo solicita.', 'success');
   } catch (error) {
     const message = error?.name === 'NotAllowedError'
-      ? 'Ventana de presentación abierta. Permite administrar ventanas para enviarla automáticamente a la segunda pantalla.'
-      : 'Ventana de presentación abierta. No fue posible detectar una segunda pantalla en este navegador.';
-    setStatus(message, 'success');
+      ? 'Edge no tiene permiso para administrar ventanas. Permítelo para este sitio e inténtalo nuevamente.'
+      : 'No fue posible detectar las pantallas. Verifica que abras la web desde GitHub Pages y que Edge esté actualizado.';
+    setStatus(message, 'error');
   }
 }
 
@@ -121,11 +122,11 @@ function openPresentation() {
   presentationWindow = presentation;
   presentation.focus();
   if (!window.isSecureContext) {
-    setStatus('Ventana de presentación abierta. La proyección automática entre pantallas requiere abrir la web desde HTTPS.', 'success');
+    setStatus('La ventana se abrió, pero la proyección automática requiere abrir la web desde GitHub Pages (HTTPS).', 'error');
     return;
   }
   if (typeof window.getScreenDetails !== 'function') {
-    setStatus('Ventana de presentación abierta. La detección de segunda pantalla no está disponible en este navegador o versión de Edge.', 'success');
+    setStatus('La ventana se abrió, pero este Edge no permite detectar una segunda pantalla. Actualízalo y prueba de nuevo.', 'error');
     return;
   }
   setStatus('Solicitando permiso para detectar pantallas…');
