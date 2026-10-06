@@ -25,6 +25,7 @@ Agilizar la preparación de pasajes bíblicos para la proyección en iglesias: s
 5. Revisa las láminas con las flechas del carrusel.
 6. Descarga todas las imágenes con **Descargar (X PNG)** o crea una presentación con **Descargar PPTX (X diapos.)**.
 7. Para presentar directamente, presiona **Presentar en pantalla completa**. Se abrirá `output.html` con la lámina actual; usa las flechas del teclado o los controles discretos al mover el puntero. La cita permanece sincronizada con el generador mientras ambas pestañas están abiertas.
+8. En Chrome o Edge para Windows, al presionar **Presentar** el navegador puede solicitar permiso para administrar ventanas. Si se concede y hay una segunda pantalla, la salida se abrirá y ajustará automáticamente en ella. En otros navegadores se abre como una ventana de presentación normal.
 
 ## Formatos de referencia admitidos
 
