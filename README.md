@@ -32,6 +32,7 @@ Agilizar la preparación de pasajes bíblicos para la proyección en iglesias: s
 - `Mateo 12` — capítulo completo.
 - `Mateo 12:1` — un versículo.
 - `Mateo 12:1-3` — rango de versículos.
+- `Marcos 1:2-` — desde el versículo 2 hasta el final del capítulo.
 - `Mateo 12:1,5-8` — versículos y rangos del mismo capítulo.
 - `Mateo 12:3,4 y 7` — versículos individuales.
 

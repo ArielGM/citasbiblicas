@@ -249,24 +249,30 @@ function renderFontOptions() {
 
 function parseReference(value) {
   const match = value.trim().match(/^(.+?)\s+(\d+)(?:\s*:\s*(.+))?\s*$/);
-  if (!match) throw new Error('Usa un formato como: Mateo 12, Mateo 12:1-3 o Mateo 12:1,5-8.');
+  if (!match) throw new Error('Usa un formato como: Mateo 12, Mateo 12:1-3, Mateo 12:2- o Mateo 12:1,5-8.');
   const [, rawBook, chapter, selection] = match;
   const book = BOOKS[normalize(rawBook)];
   if (!book) throw new Error('No reconocí el libro. Prueba “Mateo” o “1 Corintios”.');
   if (!selection) return { book, chapter: Number(chapter), verses: null, label: rawBook.trim() };
 
   const requested = new Set();
+  const openRanges = [];
   const parts = selection.replace(/\s+y\s+/giu, ',').split(/[;,]/).map(part => part.trim()).filter(Boolean);
   if (!parts.length) throw new Error('Indica al menos un versículo después de los dos puntos.');
 
   for (const part of parts) {
+    const openRange = part.match(/^(\d+)\s*[-–]\s*$/);
+    if (openRange) {
+      openRanges.push(Number(openRange[1]));
+      continue;
+    }
     const range = part.match(/^(\d+)(?:\s*[-–]\s*(\d+))?$/);
-    if (!range) throw new Error('Usa números, rangos con guion y separa grupos con coma o “y”.');
+    if (!range) throw new Error('Usa números, rangos con guion y separa grupos con coma o “y”. Un guion final busca hasta el final del capítulo.');
     const from = Number(range[1]), to = Number(range[2] || range[1]);
     if (to < from) throw new Error('El último versículo de cada rango debe ser mayor o igual al primero.');
     for (let verse = from; verse <= to; verse += 1) requested.add(verse);
   }
-  return { book, chapter: Number(chapter), verses: requested, label: rawBook.trim() };
+  return { book, chapter: Number(chapter), verses: requested, openRanges, label: rawBook.trim() };
 }
 
 function setStatus(message, kind = '') { status.textContent = message; status.className = `status ${kind}`; }
@@ -490,7 +496,10 @@ async function search(event) {
     const response = await fetch(`https://bible.helloao.org/api/${translation.id}/${reference.book}/${reference.chapter}.json`);
     if (!response.ok) throw new Error('No se pudo encontrar ese capítulo.');
     const chapter = await response.json();
-    const verses = chapterVerses(chapter).filter(verse => !reference.verses || reference.verses.has(verse.v));
+    const verses = chapterVerses(chapter).filter(verse => {
+      if (!reference.verses) return true;
+      return reference.verses.has(verse.v) || reference.openRanges?.some(from => verse.v >= from);
+    });
     if (!verses.length) throw new Error('No encontré versículos para esa referencia.');
     versionEl.textContent = (chapter.translation.shortName || translation.shortName).toUpperCase();
     slides = makeSlides(verses, reference);
