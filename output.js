@@ -82,6 +82,11 @@ function requestAutomaticFullscreen() {
   });
 }
 
+function claimPresentationFocus() {
+  window.focus();
+  window.setTimeout(() => window.focus(), 120);
+}
+
 previous.addEventListener('click', () => navigate(-1));
 next.addEventListener('click', () => navigate(1));
 fullscreen.addEventListener('click', toggleFullscreen);
@@ -97,4 +102,6 @@ window.addEventListener('storage', event => {
 });
 channel?.addEventListener('message', event => applyState(event.data));
 applyState(readStoredState() || state);
+claimPresentationFocus();
 requestAutomaticFullscreen();
+window.addEventListener('load', claimPresentationFocus, { once: true });

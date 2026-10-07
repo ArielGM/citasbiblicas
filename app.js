@@ -85,6 +85,14 @@ function presentationWindowFeatures(display) {
   return `popup=yes,fullscreen=yes,resizable=yes,scrollbars=no,width=${width},height=${height}${position}`;
 }
 
+function focusPresentation(presentation) {
+  if (!presentation || presentation.closed) return;
+  presentation.focus();
+  window.setTimeout(() => {
+    if (!presentation.closed) presentation.focus();
+  }, 240);
+}
+
 async function movePresentationToSecondaryDisplay(presentation) {
   try {
     const details = await window.getScreenDetails();
@@ -98,7 +106,7 @@ async function movePresentationToSecondaryDisplay(presentation) {
 
     presentation.moveTo(Math.round(secondaryDisplay.availLeft), Math.round(secondaryDisplay.availTop));
     presentation.resizeTo(Math.round(secondaryDisplay.availWidth), Math.round(secondaryDisplay.availHeight));
-    presentation.focus();
+    focusPresentation(presentation);
     setStatus('Salida enviada a la segunda pantalla. Usa pantalla completa en esa ventana si Edge lo solicita.', 'success');
   } catch (error) {
     const message = error?.name === 'NotAllowedError'
@@ -120,7 +128,7 @@ function openPresentation() {
   }
 
   presentationWindow = presentation;
-  presentation.focus();
+  focusPresentation(presentation);
   if (!window.isSecureContext) {
     setStatus('La ventana se abrió, pero la proyección automática requiere abrir la web desde GitHub Pages (HTTPS).', 'error');
     return;
