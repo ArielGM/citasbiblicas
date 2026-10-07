@@ -434,6 +434,7 @@ function updateTitleSize() {
   titleSizeValue.value = label;
   titleSizeValue.textContent = label;
   titleSize.setAttribute('aria-valuetext', label);
+  titleSize.style.setProperty('--title-size-progress', `${Number(titleSize.value) - 100}%`);
   refEl.style.setProperty('--reference-min', `${Math.round(16 * scale)}px`);
   refEl.style.setProperty('--reference-preferred', `${(1.65 * scale).toFixed(3)}vw`);
   refEl.style.setProperty('--reference-max', `${Math.round(27.2 * scale)}px`);
