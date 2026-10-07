@@ -8,7 +8,7 @@ body.is-transparent { background:transparent; }
 .output-card::before { position:absolute; inset:18px; border:1px solid rgba(255,255,255,.13); content:""; }
 body.is-transparent .output-card::before { border-color:rgba(255,255,255,.2); }
 .output-content { position:relative; z-index:1; display:grid; width:82%; height:72%; grid-template-rows:auto minmax(0, 1fr) auto; gap:clamp(12px, 2.2vw, 28px); text-align:center; }
-.output-reference { margin:0; color:var(--reference); font-family:var(--font); font-size:clamp(1rem, 1.65vw, 1.7rem); font-weight:600; letter-spacing:-.025em; }
+.output-reference { margin:0; color:var(--reference); font-family:var(--font); font-size:clamp(var(--reference-min, 1rem), var(--reference-preferred, 1.65vw), var(--reference-max, 1.7rem)); font-weight:600; letter-spacing:-.025em; line-height:1.1; text-wrap:balance; }
 .output-text { display:flex; min-height:0; align-items:center; justify-content:center; margin:0; overflow:hidden; color:var(--text); font-family:var(--font); font-size:var(--verse-size, clamp(1.05rem, 2.2vw, 2.25rem)); font-weight:var(--verse-weight, 300); line-height:1.38; letter-spacing:-.025em; text-wrap:balance; }
 .output-version { min-height:1em; margin:0; color:#c5d0e0; font-family:var(--font); font-size:clamp(.5rem, .75vw, .7rem); font-weight:700; letter-spacing:.14em; }
 .presentation-controls { position:fixed; z-index:5; right:50%; bottom:clamp(14px, 3vh, 32px); display:flex; align-items:center; gap:10px; padding:8px; border:1px solid rgba(197,208,224,.32); border-radius:14px; background:rgba(7,18,31,.78); color:#f5f7fb; opacity:0; transform:translate(50%, 12px); transition:opacity .2s ease, transform .2s ease; }

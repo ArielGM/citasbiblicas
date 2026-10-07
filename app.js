@@ -28,6 +28,9 @@ const textEl = document.querySelector('#verse-text');
 const versionEl = document.querySelector('#verse-version');
 const bg = document.querySelector('#background-color');
 const fg = document.querySelector('#text-color');
+const titleColor = document.querySelector('#title-color');
+const titleSize = document.querySelector('#title-size');
+const titleSizeValue = document.querySelector('#title-size-value');
 const fontFamily = document.querySelector('#font-family');
 const fontTrigger = document.querySelector('#font-family-trigger');
 const fontTriggerText = document.querySelector('#font-family-text');
@@ -65,6 +68,8 @@ function presentationState() {
     appearance: {
       background: bg.value,
       text: fg.value,
+      titleColor: titleColor.value,
+      titleSize: Number(titleSize.value),
       transparent: transparent.checked,
       font: fontFamily.value,
       version: versionEl.textContent
@@ -400,6 +405,17 @@ function fitText() {
   return false;
 }
 
+function updateTitleSize() {
+  const scale = Math.max(1, Math.min(1.8, Number(titleSize.value) / 100 || 1.2));
+  const label = `${Number(titleSize.value)}%`;
+  titleSizeValue.value = label;
+  titleSizeValue.textContent = label;
+  titleSize.setAttribute('aria-valuetext', label);
+  refEl.style.setProperty('--reference-min', `${Math.round(16 * scale)}px`);
+  refEl.style.setProperty('--reference-preferred', `${(1.65 * scale).toFixed(3)}vw`);
+  refEl.style.setProperty('--reference-max', `${Math.round(27.2 * scale)}px`);
+}
+
 function renderDots() {
   dots.innerHTML = '';
   slides.forEach((slide, index) => {
@@ -477,6 +493,8 @@ function showSlide(index) {
 function updateAppearance() {
   card.style.backgroundColor = transparent.checked ? 'transparent' : bg.value;
   textEl.style.color = fg.value;
+  refEl.style.color = titleColor.value;
+  updateTitleSize();
   const verseFont = fontFamily.value === 'cormorant' ? 'Cormorant Garamond, Georgia, serif' : 'Manrope, Avenir, sans-serif';
   card.style.setProperty('--verse-font', verseFont);
   [refEl, textEl, versionEl].forEach(element => { element.style.fontFamily = verseFont; });
@@ -634,7 +652,7 @@ fontTrigger.addEventListener('click', () => {
 fontTrigger.addEventListener('keydown', event => {
   if (event.key === 'Escape') closeFontOptions();
 });
-[bg, fg, fontFamily, transparent].forEach(control => control.addEventListener('input', updateAppearance));
+[bg, fg, titleColor, titleSize, fontFamily, transparent].forEach(control => control.addEventListener('input', updateAppearance));
 bibleVersion.addEventListener('change', () => {
   const translation = selectedTranslation();
   if (translation) chooseTranslation(translation.id, true);

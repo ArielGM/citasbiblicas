@@ -50,8 +50,10 @@ FORM: Herramienta operativa de dos paneles; la previsualización es la pieza cen
           </form>
 
           <div class="appearance" aria-label="Personalización de la lámina">
+            <label class="color-field" for="title-color">Título <input id="title-color" type="color" value="#f7b733" /></label>
+            <label class="title-size-field" for="title-size"><span>Tamaño título</span><span class="title-size-control"><span class="title-size-small" aria-hidden="true">A</span><input id="title-size" type="range" min="100" max="180" value="120" step="20" /><span class="title-size-large" aria-hidden="true">A</span></span><output id="title-size-value" class="sr-only" for="title-size">120%</output></label>
             <label class="color-field" for="background-color">Fondo <input id="background-color" type="color" value="#05070b" /></label>
-            <label class="color-field" for="text-color">Texto <input id="text-color" type="color" value="#ffffff" /></label>
+            <label class="color-field" for="text-color">Versículo <input id="text-color" type="color" value="#ffffff" /></label>
             <div class="font-field">
               <span id="font-label">Tipografía</span>
               <div class="font-picker">

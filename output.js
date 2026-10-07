@@ -33,9 +33,14 @@ function render() {
   const slide = slides[index];
   const appearance = state.appearance || {};
   const isClassic = appearance.font === 'cormorant';
+  const titleScale = Math.max(1, Math.min(1.8, Number(appearance.titleSize) / 100 || 1.2));
 
   document.documentElement.style.setProperty('--background', appearance.background || '#05070b');
   document.documentElement.style.setProperty('--text', appearance.text || '#ffffff');
+  document.documentElement.style.setProperty('--reference', appearance.titleColor || '#f7b733');
+  reference.style.setProperty('--reference-min', `${Math.round(16 * titleScale)}px`);
+  reference.style.setProperty('--reference-preferred', `${(1.65 * titleScale).toFixed(3)}vw`);
+  reference.style.setProperty('--reference-max', `${Math.round(27.2 * titleScale)}px`);
   document.documentElement.style.setProperty('--font', isClassic ? 'Cormorant Garamond, Georgia, serif' : 'Manrope, Avenir, sans-serif');
   card.style.setProperty('--verse-weight', isClassic ? '500' : '300');
   document.body.classList.toggle('is-transparent', Boolean(appearance.transparent));
