@@ -52,8 +52,28 @@ FORM: Herramienta operativa de dos paneles; la previsualización es la pieza cen
           <div class="appearance" aria-label="Personalización de la lámina">
             <label class="color-field" for="title-color">Título <input id="title-color" type="color" value="#f7b733" /></label>
             <label class="title-size-field" for="title-size"><span>Tamaño título</span><span class="title-size-control"><span class="title-size-small" aria-hidden="true">A</span><input id="title-size" type="range" min="100" max="180" value="120" step="20" /><span class="title-size-large" aria-hidden="true">A</span></span><output id="title-size-value" class="sr-only" for="title-size">120%</output></label>
-            <label class="color-field" for="background-color">Fondo <input id="background-color" type="color" value="#05070b" /></label>
             <label class="color-field" for="text-color">Versículo <input id="text-color" type="color" value="#ffffff" /></label>
+            <section class="background-settings" aria-label="Fondo">
+              <span class="background-settings-title">Fondo</span>
+              <div class="background-image-field">
+                <span id="background-image-label">Imagen</span>
+                <div class="background-image-picker">
+                  <button id="background-image-trigger" class="background-image-trigger" type="button" aria-labelledby="background-image-label background-image-text" aria-haspopup="listbox" aria-controls="background-image-options" aria-expanded="false">
+                    <img id="background-image-preview" class="background-image-preview" src="assets/backgrounds/luz-calida.webp" alt="" aria-hidden="true" hidden />
+                    <span id="background-image-text">Elegir imagen</span><span class="dropdown-arrow" aria-hidden="true">⌄</span>
+                  </button>
+                  <div id="background-image-options" class="background-image-options" role="listbox" aria-label="Imágenes de fondo" hidden>
+                    <button class="background-choice" type="button" data-background="warm-light" aria-pressed="false" aria-label="Luz cálida"><img src="assets/backgrounds/luz-calida.webp" alt="" /></button>
+                    <button class="background-choice" type="button" data-background="mountains" aria-pressed="false" aria-label="Montañas suaves"><img src="assets/backgrounds/montanas-suaves.webp" alt="" /></button>
+                    <button class="background-choice" type="button" data-background="cross" aria-pressed="false" aria-label="Cruz difusa"><img src="assets/backgrounds/cruz-difusa.webp" alt="" /></button>
+                    <button class="background-choice" type="button" data-background="bible" aria-pressed="false" aria-label="Biblia abstracta"><img src="assets/backgrounds/biblia-abstracta.webp" alt="" /></button>
+                    <button class="background-choice" type="button" data-background="texture" aria-pressed="false" aria-label="Textura nocturna"><img src="assets/backgrounds/textura-nocturna.webp" alt="" /></button>
+                    <button class="background-choice" type="button" data-background="landscape" aria-pressed="false" aria-label="Paisaje sereno"><img src="assets/backgrounds/paisaje-sereno.webp" alt="" /></button>
+                  </div>
+                </div>
+              </div>
+              <label id="solid-color-option" class="solid-color-option is-active" for="background-color"><span>Color sólido</span><input id="background-color" type="color" value="#05070b" /></label>
+            </section>
             <div class="font-field">
               <span id="font-label">Tipografía</span>
               <div class="font-picker">
@@ -75,6 +95,8 @@ FORM: Herramienta operativa de dos paneles; la previsualización es la pieza cen
 
         <section class="preview-section" aria-label="Previsualización del pasaje">
           <article id="verse-card" class="verse-card" aria-live="polite">
+            <img id="verse-background" class="verse-background" src="assets/backgrounds/luz-calida.webp" alt="" aria-hidden="true" hidden />
+            <div class="verse-background-overlay" aria-hidden="true"></div>
             <div class="card-content">
               <p id="verse-reference" class="verse-reference">Mateo 5:3–12</p>
               <p id="verse-text" class="verse-text">Cargando pasaje…</p>

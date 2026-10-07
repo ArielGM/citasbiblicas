@@ -12,6 +12,7 @@ Agilizar la preparación de pasajes bíblicos para la proyección en iglesias: s
 - `styles.css`: diseño responsivo, colores, tipografías y formato visual de las láminas.
 - `app.js`: consulta bíblica, interpretación de referencias, agrupación de versículos, carrusel y exportaciones.
 - `output.html`, `output.css` y `output.js`: salida limpia para presentar en una segunda pestaña o en pantalla completa.
+- `assets/backgrounds/`: seis fondos WebP locales 1920 × 1080 para proyectar sin depender de permisos de imágenes externas.
 - API bíblica: [Free Use Bible API](https://bible.helloao.org/docs/).
 - `html2canvas`: convierte cada lámina en PNG.
 - `PptxGenJS`: crea un archivo PPTX con una lámina por diapositiva.
@@ -41,6 +42,7 @@ Agilizar la preparación de pasajes bíblicos para la proyección en iglesias: s
 - La interfaz usa una composición de cabina oscura, con acentos ámbar y una previsualización 16:9 de la lámina final.
 - El texto de los versículos se ajusta dinámicamente al espacio disponible. Si un pasaje es extenso, se reparte automáticamente en varias láminas legibles, incluso cuando un único versículo necesita continuar en otra lámina.
 - Se pueden cambiar el color de fondo, el color del versículo y activar fondo transparente.
+- El selector **Imagen** incluye luz cálida, montañas, cruz difusa, Biblia abstracta, textura nocturna y paisaje sereno. **Color sólido** quita la imagen de inmediato; los fondos visuales añaden automáticamente una capa de contraste y el fondo transparente siempre tiene prioridad.
 - El título de la cita tiene color independiente y cinco tamaños predefinidos: 100%, 120%, 140%, 160% y 180%. El valor inicial es 120%.
 - Hay dos tipografías disponibles: Manrope (minimalista) y Cormorant Garamond (clásica). La elección se aplica al título, texto y versión bíblica.
 - El diseño se adapta a computador, tablet y móvil. En paneles estrechos, el control de tamaño del título prioriza la barra deslizante y conserva las referencias visuales de A pequeña y A grande.

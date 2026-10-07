@@ -1,5 +1,6 @@
 const STORAGE_KEY = 'citas-biblicas-presentacion';
 const card = document.querySelector('#output-card');
+const backgroundImage = document.querySelector('#output-background');
 const reference = document.querySelector('#output-reference');
 const text = document.querySelector('#output-text');
 const version = document.querySelector('#output-version');
@@ -11,6 +12,15 @@ const fullscreen = document.querySelector('#output-fullscreen');
 const channel = 'BroadcastChannel' in window ? new BroadcastChannel(STORAGE_KEY) : null;
 let state = { slides: [], currentSlide: 0, appearance: {} };
 let controlsTimer;
+
+const BACKGROUND_OPTIONS = {
+  'warm-light': 'assets/backgrounds/luz-calida.webp',
+  mountains: 'assets/backgrounds/montanas-suaves.webp',
+  cross: 'assets/backgrounds/cruz-difusa.webp',
+  bible: 'assets/backgrounds/biblia-abstracta.webp',
+  texture: 'assets/backgrounds/textura-nocturna.webp',
+  landscape: 'assets/backgrounds/paisaje-sereno.webp'
+};
 
 function readStoredState() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch { return null; }
@@ -24,6 +34,14 @@ function fitText() {
     card.style.setProperty('--verse-size', size);
     if (text.scrollHeight <= text.clientHeight) return;
   }
+}
+
+function renderBackground(appearance) {
+  const source = !appearance.transparent && BACKGROUND_OPTIONS[appearance.backgroundImage];
+  const hasImage = Boolean(source);
+  card.classList.toggle('has-background-image', hasImage);
+  backgroundImage.hidden = !hasImage;
+  if (hasImage && backgroundImage.getAttribute('src') !== source) backgroundImage.src = source;
 }
 
 function render() {
@@ -43,7 +61,9 @@ function render() {
   reference.style.setProperty('--reference-max', `${Math.round(27.2 * titleScale)}px`);
   document.documentElement.style.setProperty('--font', isClassic ? 'Cormorant Garamond, Georgia, serif' : 'Manrope, Avenir, sans-serif');
   card.style.setProperty('--verse-weight', isClassic ? '500' : '300');
+  card.style.backgroundColor = appearance.transparent ? 'transparent' : (appearance.background || '#05070b');
   document.body.classList.toggle('is-transparent', Boolean(appearance.transparent));
+  renderBackground(appearance);
   reference.textContent = slide?.reference || 'Cita bíblica';
   text.textContent = slide?.text || 'Abre esta vista desde el generador para presentar una cita.';
   version.textContent = hasSlides ? (appearance.version || '') : '';

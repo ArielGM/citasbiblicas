@@ -23,6 +23,13 @@ const versionOptions = document.querySelector('#bible-version-options');
 const status = document.querySelector('#status');
 const searchButton = document.querySelector('#search-button');
 const card = document.querySelector('#verse-card');
+const backgroundImage = document.querySelector('#verse-background');
+const backgroundChoices = [...document.querySelectorAll('[data-background]')];
+const backgroundImageTrigger = document.querySelector('#background-image-trigger');
+const backgroundImageText = document.querySelector('#background-image-text');
+const backgroundImagePreview = document.querySelector('#background-image-preview');
+const backgroundImageOptions = document.querySelector('#background-image-options');
+const solidColorOption = document.querySelector('#solid-color-option');
 const refEl = document.querySelector('#verse-reference');
 const textEl = document.querySelector('#verse-text');
 const versionEl = document.querySelector('#verse-version');
@@ -52,12 +59,22 @@ let spanishTranslations = [];
 let matchingBooks = [];
 let activeSuggestion = -1;
 let presentationWindow = null;
+let selectedBackgroundId = 'solid';
 const presentationChannel = 'BroadcastChannel' in window ? new BroadcastChannel('citas-biblicas-presentacion') : null;
 
 const FONT_OPTIONS = [
   { id: 'manrope', label: 'Manrope · minimalista' },
   { id: 'cormorant', label: 'Cormorant · clásica' }
 ];
+
+const BACKGROUND_OPTIONS = {
+  'warm-light': { label: 'Luz cálida', src: 'assets/backgrounds/luz-calida.webp' },
+  mountains: { label: 'Montañas suaves', src: 'assets/backgrounds/montanas-suaves.webp' },
+  cross: { label: 'Cruz difusa', src: 'assets/backgrounds/cruz-difusa.webp' },
+  bible: { label: 'Biblia abstracta', src: 'assets/backgrounds/biblia-abstracta.webp' },
+  texture: { label: 'Textura nocturna', src: 'assets/backgrounds/textura-nocturna.webp' },
+  landscape: { label: 'Paisaje sereno', src: 'assets/backgrounds/paisaje-sereno.webp' }
+};
 
 const normalize = value => value.trim().toLocaleLowerCase('es').replace(/\s+/g, ' ');
 
@@ -67,6 +84,7 @@ function presentationState() {
     currentSlide,
     appearance: {
       background: bg.value,
+      backgroundImage: selectedBackgroundId,
       text: fg.value,
       titleColor: titleColor.value,
       titleSize: Number(titleSize.value),
@@ -220,6 +238,11 @@ async function chooseTranslation(id, refreshPassage = false) {
 function closeFontOptions() {
   fontOptions.hidden = true;
   fontTrigger.setAttribute('aria-expanded', 'false');
+}
+
+function closeBackgroundImageOptions() {
+  backgroundImageOptions.hidden = true;
+  backgroundImageTrigger.setAttribute('aria-expanded', 'false');
 }
 
 function chooseFont(id) {
@@ -490,8 +513,45 @@ function showSlide(index) {
   }));
 }
 
+function updateBackgroundChoices() {
+  const background = BACKGROUND_OPTIONS[selectedBackgroundId];
+  backgroundChoices.forEach(choice => {
+    const isActive = choice.dataset.background === selectedBackgroundId;
+    choice.classList.toggle('is-active', isActive);
+    choice.setAttribute('aria-pressed', String(isActive));
+  });
+  solidColorOption.classList.toggle('is-active', !background);
+  backgroundImageText.textContent = background?.label || 'Elegir imagen';
+  backgroundImagePreview.hidden = !background;
+  if (background && backgroundImagePreview.getAttribute('src') !== background.src) backgroundImagePreview.src = background.src;
+}
+
+function updateBackgroundImage() {
+  const background = BACKGROUND_OPTIONS[selectedBackgroundId];
+  const hasImage = Boolean(background && !transparent.checked);
+  card.classList.toggle('has-background-image', hasImage);
+  backgroundImage.hidden = !hasImage;
+  if (hasImage && backgroundImage.getAttribute('src') !== background.src) backgroundImage.src = background.src;
+}
+
+function selectBackground(id) {
+  selectedBackgroundId = BACKGROUND_OPTIONS[id] ? id : 'solid';
+  transparent.checked = false;
+  updateBackgroundChoices();
+  closeBackgroundImageOptions();
+  updateAppearance();
+}
+
+function selectSolidBackground() {
+  selectedBackgroundId = 'solid';
+  transparent.checked = false;
+  updateBackgroundChoices();
+  updateAppearance();
+}
+
 function updateAppearance() {
   card.style.backgroundColor = transparent.checked ? 'transparent' : bg.value;
+  updateBackgroundImage();
   textEl.style.color = fg.value;
   refEl.style.color = titleColor.value;
   updateTitleSize();
@@ -532,8 +592,15 @@ async function search(event) {
 }
 
 const waitForPaint = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+async function waitForBackgroundImage() {
+  if (backgroundImage.hidden || backgroundImage.complete) return;
+  await new Promise(resolve => {
+    backgroundImage.addEventListener('load', resolve, { once: true });
+    backgroundImage.addEventListener('error', resolve, { once: true });
+  });
+}
 async function exportSlide(index) {
-  await showSlide(index); await waitForPaint();
+  await showSlide(index); await waitForBackgroundImage(); await waitForPaint();
   const canvas = await html2canvas(card, { scale: 3, backgroundColor: transparent.checked ? null : bg.value, useCORS: true, logging: false });
   const output = document.createElement('canvas'); output.width = 1920; output.height = 1080;
   output.getContext('2d').drawImage(canvas, 0, 0, 1920, 1080);
@@ -595,7 +662,7 @@ async function downloadPptx() {
       downloadPptButton.setAttribute('aria-label', `Generando diapositiva ${index + 1} de ${slides.length}`);
       const imageData = await blobToDataUrl(await exportSlide(index));
       const pptSlide = pptx.addSlide();
-      pptSlide.background = { color: bg.value.replace('#', '') };
+      if (!transparent.checked) pptSlide.background = { color: bg.value.replace('#', '') };
       pptSlide.addImage({ data: imageData, x: 0, y: 0, w: 13.333, h: 7.5 });
     }
     const versionId = selectedTranslation()?.shortName?.toLowerCase() || 'biblia';
@@ -634,6 +701,7 @@ document.addEventListener('pointerdown', event => {
   if (!event.target.closest('.reference-autocomplete')) closeBookSuggestions();
   if (!event.target.closest('.version-picker')) closeVersionOptions();
   if (!event.target.closest('.font-picker')) closeFontOptions();
+  if (!event.target.closest('.background-image-picker')) closeBackgroundImageOptions();
 });
 versionTrigger.addEventListener('click', () => {
   if (versionTrigger.disabled) return;
@@ -652,7 +720,18 @@ fontTrigger.addEventListener('click', () => {
 fontTrigger.addEventListener('keydown', event => {
   if (event.key === 'Escape') closeFontOptions();
 });
-[bg, fg, titleColor, titleSize, fontFamily, transparent].forEach(control => control.addEventListener('input', updateAppearance));
+backgroundImageTrigger.addEventListener('click', () => {
+  const willOpen = backgroundImageOptions.hidden;
+  backgroundImageOptions.hidden = !willOpen;
+  backgroundImageTrigger.setAttribute('aria-expanded', String(willOpen));
+});
+backgroundImageTrigger.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeBackgroundImageOptions();
+});
+[fg, titleColor, titleSize, fontFamily, transparent].forEach(control => control.addEventListener('input', updateAppearance));
+bg.addEventListener('click', selectSolidBackground);
+bg.addEventListener('input', selectSolidBackground);
+backgroundChoices.forEach(choice => choice.addEventListener('click', () => selectBackground(choice.dataset.background)));
 bibleVersion.addEventListener('change', () => {
   const translation = selectedTranslation();
   if (translation) chooseTranslation(translation.id, true);
@@ -663,6 +742,8 @@ downloadButton.addEventListener('click', downloadPngs);
 downloadPptButton.addEventListener('click', downloadPptx);
 presentButton.addEventListener('click', openPresentation);
 window.addEventListener('resize', () => { showSlide(currentSlide); });
+Object.values(BACKGROUND_OPTIONS).forEach(({ src }) => { const image = new Image(); image.src = src; });
 renderFontOptions();
+updateBackgroundChoices();
 updateAppearance(); showSlide(0);
 loadTranslations();

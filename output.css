@@ -21,3 +21,10 @@ body.is-transparent .output-card::before { border-color:rgba(255,255,255,.2); }
 .presentation-controls span { min-width:44px; color:#c5d0e0; font-size:.74rem; font-weight:700; text-align:center; }
 @media (max-width:480px) { .output-card { padding:18px 14px; }.output-card::before { inset:10px; }.output-content { width:94%; height:82%; gap:8px; }.presentation-controls { bottom:12px; gap:6px; padding:6px; }.presentation-controls button { width:34px; height:34px; }.presentation-controls span { min-width:38px; font-size:.68rem; } }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition-duration:.01ms !important; } }
+
+.output-background,.output-background-overlay { position:absolute; inset:0; width:100%; height:100%; }
+.output-background { z-index:0; object-fit:cover; }
+.output-background-overlay { z-index:1; background:linear-gradient(120deg, rgba(3,7,13,.6), rgba(3,7,13,.45)); opacity:0; }
+.output-card.has-background-image .output-background-overlay { opacity:1; }
+.output-card::before { z-index:2; }
+.output-content { z-index:3; }
