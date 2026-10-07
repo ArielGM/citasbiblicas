@@ -429,7 +429,7 @@ function fitText() {
 }
 
 function updateTitleSize() {
-  const scale = Math.max(1, Math.min(1.8, Number(titleSize.value) / 100 || 1.2));
+  const scale = Math.max(1, Math.min(2, Number(titleSize.value) / 100 || 1.2));
   const label = `${Number(titleSize.value)}%`;
   titleSizeValue.value = label;
   titleSizeValue.textContent = label;
@@ -683,6 +683,11 @@ input.addEventListener('focus', renderBookSuggestions);
 input.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
     closeBookSuggestions();
+    return;
+  }
+  if (event.key === 'Enter' && activeSuggestion < 0) {
+    event.preventDefault();
+    form.requestSubmit();
     return;
   }
   if (!matchingBooks.length) return;

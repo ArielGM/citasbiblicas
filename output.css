@@ -27,4 +27,5 @@ body.is-transparent .output-card::before { border-color:rgba(255,255,255,.2); }
 .output-background-overlay { z-index:1; background:linear-gradient(120deg, rgba(3,7,13,.6), rgba(3,7,13,.45)); opacity:0; }
 .output-card.has-background-image .output-background-overlay { opacity:1; }
 .output-card::before { z-index:2; }
+.output-card.has-background-image::before { border-color:transparent; }
 .output-content { z-index:3; }

@@ -51,7 +51,7 @@ function render() {
   const slide = slides[index];
   const appearance = state.appearance || {};
   const isClassic = appearance.font === 'cormorant';
-  const titleScale = Math.max(1, Math.min(1.8, Number(appearance.titleSize) / 100 || 1.2));
+  const titleScale = Math.max(1, Math.min(2, Number(appearance.titleSize) / 100 || 1.2));
 
   document.documentElement.style.setProperty('--background', appearance.background || '#05070b');
   document.documentElement.style.setProperty('--text', appearance.text || '#ffffff');
