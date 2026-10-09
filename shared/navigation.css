@@ -1,0 +1,61 @@
+/* Navegación común: cada herramienta declara sus propios tokens --nav-*. */
+.product-nav {
+  position: fixed;
+  z-index: 100;
+  top: 18px;
+  left: 50%;
+  display: inline-flex;
+  max-width: calc(100vw - 32px);
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--nav-border, var(--line));
+  border-radius: 14px;
+  background: var(--nav-surface, var(--panel));
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+  transform: translateX(-50%);
+}
+
+.product-nav a {
+  min-height: 38px;
+  padding: 0 15px;
+  border-radius: 9px;
+  color: var(--nav-ink, var(--ink));
+  font-family: Manrope, Avenir, sans-serif;
+  font-size: 0.77rem;
+  font-weight: 800;
+  line-height: 38px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.product-nav a:hover {
+  background: var(--nav-hover, rgba(255, 255, 255, 0.08));
+  transform: translateY(-1px);
+}
+
+.product-nav a[aria-current="page"] {
+  background: var(--nav-accent, var(--amber));
+  color: var(--nav-active-ink, #07121f);
+}
+
+.product-nav a:focus-visible {
+  outline: 3px solid var(--nav-focus, var(--nav-accent, var(--amber)));
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .product-nav {
+    top: 10px;
+    width: calc(100vw - 24px);
+    justify-content: center;
+  }
+
+  .product-nav a {
+    flex: 1 1 0;
+    padding-inline: 8px;
+    font-size: 0.68rem;
+    text-align: center;
+  }
+}

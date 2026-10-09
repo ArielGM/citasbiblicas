@@ -54,3 +54,9 @@ button:focus-visible,input:focus-visible { outline:3px solid var(--amber); outli
 .verse-card.has-background-image::before { border-color:transparent; }
 .card-content { z-index:3; }
 @media (max-width:480px) { .background-settings { gap:12px; }.background-image-options { grid-template-columns:repeat(3, minmax(0,1fr)); } }
+
+/* La cabecera compartida respeta la identidad nocturna azul de esta herramienta. */
+:root { --nav-surface:#10233a; --nav-border:#2b4561; --nav-accent:#f7b733; --nav-ink:#f5f7fb; --nav-active-ink:#07121f; --nav-hover:#183651; }
+body { padding-top:86px; }
+.app-shell { min-height:calc(100vh - 86px); }
+@media (max-width:480px) { body { padding-top:72px; }.app-shell { min-height:calc(100vh - 72px); } }

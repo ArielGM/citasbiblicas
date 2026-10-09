@@ -15,12 +15,12 @@ let state = { slides: [], currentSlide: 0, appearance: {} };
 let controlsTimer;
 
 const BACKGROUND_OPTIONS = {
-  'warm-light': 'assets/backgrounds/luz-calida.webp',
-  mountains: 'assets/backgrounds/montanas-suaves.webp',
-  cross: 'assets/backgrounds/cruz-difusa.webp',
-  bible: 'assets/backgrounds/biblia-abstracta.webp',
-  texture: 'assets/backgrounds/textura-nocturna.webp',
-  landscape: 'assets/backgrounds/paisaje-sereno.webp'
+  'warm-light': '../assets/backgrounds/luz-calida.webp',
+  mountains: '../assets/backgrounds/montanas-suaves.webp',
+  cross: '../assets/backgrounds/cruz-difusa.webp',
+  bible: '../assets/backgrounds/biblia-abstracta.webp',
+  texture: '../assets/backgrounds/textura-nocturna.webp',
+  landscape: '../assets/backgrounds/paisaje-sereno.webp'
 };
 
 function readStoredState() {

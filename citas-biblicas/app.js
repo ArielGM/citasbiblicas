@@ -68,12 +68,12 @@ const FONT_OPTIONS = [
 ];
 
 const BACKGROUND_OPTIONS = {
-  'warm-light': { label: 'Luz cálida', src: 'assets/backgrounds/luz-calida.webp' },
-  mountains: { label: 'Montañas suaves', src: 'assets/backgrounds/montanas-suaves.webp' },
-  cross: { label: 'Cruz difusa', src: 'assets/backgrounds/cruz-difusa.webp' },
-  bible: { label: 'Biblia abstracta', src: 'assets/backgrounds/biblia-abstracta.webp' },
-  texture: { label: 'Textura nocturna', src: 'assets/backgrounds/textura-nocturna.webp' },
-  landscape: { label: 'Paisaje sereno', src: 'assets/backgrounds/paisaje-sereno.webp' }
+  'warm-light': { label: 'Luz cálida', src: '../assets/backgrounds/luz-calida.webp' },
+  mountains: { label: 'Montañas suaves', src: '../assets/backgrounds/montanas-suaves.webp' },
+  cross: { label: 'Cruz difusa', src: '../assets/backgrounds/cruz-difusa.webp' },
+  bible: { label: 'Biblia abstracta', src: '../assets/backgrounds/biblia-abstracta.webp' },
+  texture: { label: 'Textura nocturna', src: '../assets/backgrounds/textura-nocturna.webp' },
+  landscape: { label: 'Paisaje sereno', src: '../assets/backgrounds/paisaje-sereno.webp' }
 };
 
 const normalize = value => value.trim().toLocaleLowerCase('es').replace(/\s+/g, ' ');

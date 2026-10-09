@@ -1,0 +1,141 @@
+const STORAGE_KEY = 'proyecta-cantos-presentacion';
+const card = document.querySelector('#output-card');
+const backgroundImage = document.querySelector('#output-background');
+const reference = document.querySelector('#output-reference');
+const text = document.querySelector('#output-text');
+const version = document.querySelector('#output-version');
+const controls = document.querySelector('#presentation-controls');
+const previous = document.querySelector('#output-previous');
+const next = document.querySelector('#output-next');
+const counter = document.querySelector('#output-counter');
+const fullscreen = document.querySelector('#output-fullscreen');
+const closePresentation = document.querySelector('#output-close');
+const channel = 'BroadcastChannel' in window ? new BroadcastChannel(STORAGE_KEY) : null;
+let state = { slides: [], currentSlide: 0, appearance: {} };
+let controlsTimer;
+
+const BACKGROUND_OPTIONS = {
+  'warm-light': '../assets/backgrounds/luz-calida.webp',
+  mountains: '../assets/backgrounds/montanas-suaves.webp',
+  cross: '../assets/backgrounds/cruz-difusa.webp',
+  bible: '../assets/backgrounds/biblia-abstracta.webp',
+  texture: '../assets/backgrounds/textura-nocturna.webp',
+  landscape: '../assets/backgrounds/paisaje-sereno.webp'
+};
+
+function readStoredState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch { return null; }
+}
+
+function fitText() {
+  const cardWidth = card.clientWidth || 640;
+  const sizes = [.047, .041, .036, .032, .028, .024]
+    .map(ratio => `${Math.max(10, Math.round(cardWidth * ratio))}px`);
+  for (const size of sizes) {
+    card.style.setProperty('--verse-size', size);
+    if (text.scrollHeight <= text.clientHeight) return;
+  }
+}
+
+function renderBackground(appearance) {
+  const source = !appearance.transparent && BACKGROUND_OPTIONS[appearance.backgroundImage];
+  const hasImage = Boolean(source);
+  card.classList.toggle('has-background-image', hasImage);
+  backgroundImage.hidden = !hasImage;
+  if (hasImage && backgroundImage.getAttribute('src') !== source) backgroundImage.src = source;
+}
+
+function render() {
+  const slides = Array.isArray(state.slides) ? state.slides : [];
+  const hasSlides = slides.length > 0;
+  const index = hasSlides ? Math.max(0, Math.min(state.currentSlide || 0, slides.length - 1)) : 0;
+  const slide = slides[index];
+  const appearance = state.appearance || {};
+  const isClassic = appearance.font === 'cormorant';
+  const titleScale = Math.max(1, Math.min(2, Number(appearance.titleSize) / 100 || 1.2));
+
+  document.documentElement.style.setProperty('--background', appearance.background || '#05070b');
+  document.documentElement.style.setProperty('--text', appearance.text || '#ffffff');
+  document.documentElement.style.setProperty('--reference', appearance.titleColor || '#f7b733');
+  reference.style.setProperty('--reference-min', `${Math.round(16 * titleScale)}px`);
+  reference.style.setProperty('--reference-preferred', `${(1.65 * titleScale).toFixed(3)}vw`);
+  reference.style.setProperty('--reference-max', `${Math.round(27.2 * titleScale)}px`);
+  document.documentElement.style.setProperty('--font', isClassic ? 'Cormorant Garamond, Georgia, serif' : 'Manrope, Avenir, sans-serif');
+  card.style.setProperty('--verse-weight', isClassic ? '500' : '300');
+  card.style.backgroundColor = appearance.transparent ? 'transparent' : (appearance.background || '#05070b');
+  document.body.classList.toggle('is-transparent', Boolean(appearance.transparent));
+  renderBackground(appearance);
+  reference.textContent = slide?.reference || '';
+  text.textContent = slide?.text || 'Abre esta vista desde el generador para presentar un canto.';
+  version.textContent = '';
+  card.classList.toggle('lyrics-only', !slide?.reference);
+  card.classList.toggle('title-only', Boolean(slide?.reference && !slide?.text));
+  previous.disabled = !hasSlides || index === 0;
+  next.disabled = !hasSlides || index === slides.length - 1;
+  counter.textContent = hasSlides ? `${index + 1} / ${slides.length}` : '0 / 0';
+
+  requestAnimationFrame(fitText);
+}
+
+function applyState(nextState) {
+  if (!nextState || !Array.isArray(nextState.slides)) return;
+  state = nextState;
+  render();
+}
+
+function navigate(change) {
+  const count = state.slides?.length || 0;
+  if (!count) return;
+  state.currentSlide = Math.max(0, Math.min((state.currentSlide || 0) + change, count - 1));
+  render();
+}
+
+function revealControls() {
+  controls.classList.add('is-visible');
+  clearTimeout(controlsTimer);
+  controlsTimer = setTimeout(() => controls.classList.remove('is-visible'), 1800);
+}
+
+async function toggleFullscreen() {
+  if (document.fullscreenElement) await document.exitFullscreen();
+  else await document.documentElement.requestFullscreen?.();
+}
+
+function closeOutput() {
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  window.close();
+}
+
+function requestAutomaticFullscreen() {
+  const openInFullscreen = new URLSearchParams(window.location.search).get('fullscreen') === '1';
+  if (!openInFullscreen || document.fullscreenElement || !document.fullscreenEnabled) return;
+
+  document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {
+    // Algunos navegadores exigen una interacción dentro de esta ventana. El botón queda disponible como respaldo.
+  });
+}
+
+function claimPresentationFocus() {
+  window.focus();
+  window.setTimeout(() => window.focus(), 120);
+}
+
+previous.addEventListener('click', () => navigate(-1));
+next.addEventListener('click', () => navigate(1));
+fullscreen.addEventListener('click', toggleFullscreen);
+closePresentation.addEventListener('click', closeOutput);
+document.addEventListener('pointermove', revealControls);
+document.addEventListener('keydown', event => {
+  if (event.key === 'ArrowLeft') { event.preventDefault(); navigate(-1); revealControls(); }
+  if (event.key === 'ArrowRight') { event.preventDefault(); navigate(1); revealControls(); }
+  if (event.key.toLowerCase() === 'f') toggleFullscreen();
+});
+window.addEventListener('resize', () => requestAnimationFrame(fitText));
+window.addEventListener('storage', event => {
+  if (event.key === STORAGE_KEY) applyState(readStoredState());
+});
+channel?.addEventListener('message', event => applyState(event.data));
+applyState(readStoredState() || state);
+claimPresentationFocus();
+requestAutomaticFullscreen();
+window.addEventListener('load', claimPresentationFocus, { once: true });
