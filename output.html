@@ -20,7 +20,7 @@ FORM: Salida de proyección inmersiva; la lámina es la interfaz y los controles
   <body>
     <main class="presentation" aria-label="Presentación de cita bíblica">
       <article id="output-card" class="output-card" aria-live="polite">
-        <img id="output-background" class="output-background" alt="" aria-hidden="true" hidden />
+        <img id="output-background" class="output-background" src="assets/backgrounds/luz-calida.webp" alt="" aria-hidden="true" hidden />
         <div class="output-background-overlay" aria-hidden="true"></div>
         <div class="output-content">
           <p id="output-reference" class="output-reference">Cita bíblica</p>
@@ -36,6 +36,7 @@ FORM: Salida de proyección inmersiva; la lámina es la interfaz y los controles
       <button id="output-next" type="button" aria-label="Lámina siguiente">&#8594;</button>
       <button id="output-fullscreen" type="button" aria-label="Alternar pantalla completa">&#9974;</button>
     </nav>
+    <button id="output-close" class="presentation-close" type="button" aria-label="Cerrar presentación" title="Cerrar presentación">&#215;</button>
     <script src="output.js"></script>
   </body>
 </html>

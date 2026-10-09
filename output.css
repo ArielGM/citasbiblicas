@@ -19,6 +19,7 @@ body.is-transparent .output-card::before { border-color:rgba(255,255,255,.2); }
 .presentation-controls button:disabled { opacity:.32; cursor:not-allowed; }
 .presentation-controls button:focus-visible { outline:3px solid #f7b733; outline-offset:3px; }
 .presentation-controls span { min-width:44px; color:#c5d0e0; font-size:.74rem; font-weight:700; text-align:center; }
+.presentation-close { position:fixed; z-index:6; top:clamp(14px, 3vh, 32px); right:clamp(14px, 3vw, 32px); display:grid; width:34px; height:34px; place-items:center; padding:0; border:1px solid rgba(197,208,224,.26); border-radius:50%; background:rgba(7,18,31,.56); color:#dbe5f0; cursor:pointer; font:inherit; font-size:1.25rem; font-weight:300; line-height:1; opacity:.2; transition:opacity .16s ease, background .16s ease, border-color .16s ease, transform .16s ease; }.presentation-close:hover { border-color:rgba(197,208,224,.5); background:rgba(16,35,58,.9); opacity:1; transform:translateY(-1px); }.presentation-close:focus-visible { outline:3px solid #f7b733; outline-offset:3px; opacity:1; }
 @media (max-width:480px) { .output-card { padding:18px 14px; }.output-card::before { inset:10px; }.output-content { width:94%; height:82%; gap:8px; }.presentation-controls { bottom:12px; gap:6px; padding:6px; }.presentation-controls button { width:34px; height:34px; }.presentation-controls span { min-width:38px; font-size:.68rem; } }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition-duration:.01ms !important; } }
 

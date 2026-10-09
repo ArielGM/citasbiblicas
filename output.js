@@ -9,6 +9,7 @@ const previous = document.querySelector('#output-previous');
 const next = document.querySelector('#output-next');
 const counter = document.querySelector('#output-counter');
 const fullscreen = document.querySelector('#output-fullscreen');
+const closePresentation = document.querySelector('#output-close');
 const channel = 'BroadcastChannel' in window ? new BroadcastChannel(STORAGE_KEY) : null;
 let state = { slides: [], currentSlide: 0, appearance: {} };
 let controlsTimer;
@@ -98,6 +99,11 @@ async function toggleFullscreen() {
   else await document.documentElement.requestFullscreen?.();
 }
 
+function closeOutput() {
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  window.close();
+}
+
 function requestAutomaticFullscreen() {
   const openInFullscreen = new URLSearchParams(window.location.search).get('fullscreen') === '1';
   if (!openInFullscreen || document.fullscreenElement || !document.fullscreenEnabled) return;
@@ -115,6 +121,7 @@ function claimPresentationFocus() {
 previous.addEventListener('click', () => navigate(-1));
 next.addEventListener('click', () => navigate(1));
 fullscreen.addEventListener('click', toggleFullscreen);
+closePresentation.addEventListener('click', closeOutput);
 document.addEventListener('pointermove', revealControls);
 document.addEventListener('keydown', event => {
   if (event.key === 'ArrowLeft') { event.preventDefault(); navigate(-1); revealControls(); }
