@@ -7,6 +7,6 @@ Un selector fijo y centrado permite cambiar entre Citas Bíblicas y Proyecta Can
 ## Identidades
 
 - **Citas Bíblicas:** azul nocturno con acento ámbar.
-- **Proyecta Cantos:** verde bosque profundo con acento beige cálido.
+- **Proyecta Cantos:** selva casi negra con verde petróleo y acento ámbar/cobre.
 
 Los fondos de proyección viven en `assets/backgrounds/` y son compartidos. Las pantallas de salida (`output.html`) no llevan navegación para mantener una proyección limpia.

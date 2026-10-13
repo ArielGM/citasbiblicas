@@ -7,6 +7,7 @@ const dots = $('#slide-dots'), previousButton = $('#previous-slide'), nextButton
 const backgroundChoices = $$('[data-background]'), backgroundImageTrigger = $('#background-image-trigger'), backgroundImageText = $('#background-image-text'), backgroundImagePreview = $('#background-image-preview'), backgroundImageOptions = $('#background-image-options'), solidColorOption = $('#solid-color-option');
 
 const STORAGE_KEY = 'proyecta-cantos-presentacion';
+const TITLE_VISUAL_SCALE = 0.6;
 const FONT_OPTIONS = [{ id: 'manrope', label: 'Manrope · minimalista' }, { id: 'cormorant', label: 'Cormorant · clásica' }];
 const BACKGROUND_OPTIONS = {
   'warm-light': { label: 'Luz cálida', src: '../assets/backgrounds/luz-calida.webp' }, mountains: { label: 'Montañas suaves', src: '../assets/backgrounds/montanas-suaves.webp' }, cross: { label: 'Cruz difusa', src: '../assets/backgrounds/cruz-difusa.webp' }, bible: { label: 'Biblia abstracta', src: '../assets/backgrounds/biblia-abstracta.webp' }, texture: { label: 'Textura nocturna', src: '../assets/backgrounds/textura-nocturna.webp' }, landscape: { label: 'Paisaje sereno', src: '../assets/backgrounds/paisaje-sereno.webp' }
@@ -21,14 +22,9 @@ function filenamePart(value) { return value.toLocaleLowerCase('es').normalize('N
 function state() { return { slides, currentSlide, appearance: { background: bg.value, backgroundImage: selectedBackgroundId, text: fg.value, titleColor: titleColor.value, titleSize: Number(titleSize.value), transparent: transparent.checked, font: fontFamily.value } }; }
 function publish() { const nextState = state(); try { localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState)); } catch { /* Storage can be unavailable. */ } presentationChannel?.postMessage(nextState); }
 
-function wrapLine(line, maximum = 46) {
-  const result = []; let current = '';
-  line.trim().split(/\s+/).forEach(word => { const candidate = current ? `${current} ${word}` : word; if (current && candidate.length > maximum) { result.push(current); current = word; } else current = candidate; });
-  if (current) result.push(current); return result;
-}
 function makeSlides(value) {
   const sections = [], source = value.replace(/\r\n?/g, '\n').split('\n'); let section = [];
-  source.forEach(raw => { const line = raw.trim().replace(/\s+/g, ' '); if (!line) { if (section.length) { sections.push(section); section = []; } } else section.push(...wrapLine(line)); });
+  source.forEach(raw => { const line = raw.trim().replace(/\s+/g, ' '); if (!line) { if (section.length) { sections.push(section); section = []; } } else section.push(line); });
   if (section.length) sections.push(section);
   const generated = sections.flatMap(lines => { const groups = [], rest = [...lines]; while (rest.length) groups.push(rest.splice(0, rest.length === 4 ? 2 : Math.min(3, rest.length))); return groups.map(group => ({ reference: '', text: group.join('\n') })); });
   const title = songTitle.value.trim();
@@ -42,12 +38,22 @@ function updateFontOptions() {
   fontOptions.innerHTML = '';
   FONT_OPTIONS.forEach(option => { const button = document.createElement('button'); button.type = 'button'; button.className = 'font-option'; button.dataset.font = option.id; button.setAttribute('role', 'option'); button.textContent = option.label; button.addEventListener('click', () => { fontFamily.value = option.id; closeFontOptions(); updateAppearance(); }); fontOptions.append(button); });
 }
-function updateTitleSize() { const scale = Math.max(1, Math.min(2, Number(titleSize.value) / 100 || 1.2)), label = `${titleSize.value}%`; titleSizeValue.value = label; titleSizeValue.textContent = label; titleSize.setAttribute('aria-valuetext', label); titleSize.style.setProperty('--title-size-progress', `${titleSize.value - 100}%`); refEl.style.setProperty('--reference-min', `${Math.round(16 * scale)}px`); refEl.style.setProperty('--reference-preferred', `${(1.65 * scale).toFixed(3)}vw`); refEl.style.setProperty('--reference-max', `${Math.round(27.2 * scale)}px`); }
+function updateTitleSize() { const scale = Math.max(1, Math.min(2, Number(titleSize.value) / 100 || 1.2)), visualScale = scale * TITLE_VISUAL_SCALE, label = `${titleSize.value}%`; titleSizeValue.value = label; titleSizeValue.textContent = label; titleSize.setAttribute('aria-valuetext', label); titleSize.style.setProperty('--title-size-progress', `${titleSize.value - 100}%`); refEl.style.setProperty('--reference-min', `${Math.round(16 * scale)}px`); refEl.style.setProperty('--reference-preferred', `${(1.65 * scale).toFixed(3)}vw`); refEl.style.setProperty('--reference-max', `${Math.round(27.2 * scale)}px`); card.style.setProperty('--title-size-min', `${Math.round(32 * visualScale)}px`); card.style.setProperty('--title-size-preferred', `${(4.6 * visualScale).toFixed(3)}vw`); card.style.setProperty('--title-size-max', `${Math.round(86.4 * visualScale)}px`); }
 function updateBackgroundChoices() { const background = BACKGROUND_OPTIONS[selectedBackgroundId]; backgroundChoices.forEach(choice => { const active = choice.dataset.background === selectedBackgroundId; choice.classList.toggle('is-active', active); choice.setAttribute('aria-pressed', String(active)); }); solidColorOption.classList.toggle('is-active', !background); backgroundImageText.textContent = background?.label || 'Elegir imagen'; backgroundImagePreview.hidden = !background; if (background && backgroundImagePreview.getAttribute('src') !== background.src) backgroundImagePreview.src = background.src; }
 function updateBackgroundImage() { const background = BACKGROUND_OPTIONS[selectedBackgroundId], hasImage = Boolean(background && !transparent.checked); card.classList.toggle('has-background-image', hasImage); backgroundImage.hidden = !hasImage; if (hasImage && backgroundImage.getAttribute('src') !== background.src) backgroundImage.src = background.src; }
 function selectBackground(id) { selectedBackgroundId = BACKGROUND_OPTIONS[id] ? id : 'solid'; transparent.checked = false; updateBackgroundChoices(); closeBackgroundOptions(); updateAppearance(); }
 function selectSolidBackground() { selectedBackgroundId = 'solid'; transparent.checked = false; updateBackgroundChoices(); updateAppearance(); }
-function fitText() { const width = card.clientWidth || 640, sizes = [.055, .05, .045, .04, .035, .03].map(ratio => `${Math.max(10, Math.round(width * ratio))}px`); for (const size of sizes) { card.style.setProperty('--verse-size', size); if (textEl.scrollHeight <= textEl.clientHeight) return; } }
+function fitText() {
+  if (!textEl.textContent.trim()) return;
+  const width = card.clientWidth || 640, lineCount = textEl.textContent.split('\n').filter(Boolean).length;
+  const preferred = width * (lineCount <= 2 ? .056 : .048), minimum = Math.max(16, Math.round(width * .018));
+  for (let size = Math.round(preferred); size >= minimum; size -= 1) {
+    card.style.setProperty('--verse-size', `${size}px`);
+    const fitsWidth = textEl.scrollWidth <= textEl.clientWidth + 1;
+    const fitsHeight = textEl.scrollHeight <= textEl.clientHeight + 1;
+    if (fitsWidth && fitsHeight) return;
+  }
+}
 function renderDots() { dots.innerHTML = ''; slides.forEach((_, index) => { const dot = document.createElement('button'); dot.type = 'button'; dot.className = 'slide-dot'; dot.setAttribute('aria-label', `Ver lámina ${index + 1} de ${slides.length}`); dot.setAttribute('aria-current', String(index === currentSlide)); dot.addEventListener('click', () => showSlide(index)); dots.append(dot); }); }
 function updateActions() { const count = slides.length, pngLabel = `Descargar (${count} .png)`; downloadButtonLabel.textContent = pngLabel; downloadPptButtonLabel.textContent = `Descargar (${count} .ppt)`; downloadButton.setAttribute('aria-label', pngLabel); downloadPptButton.setAttribute('aria-label', `Descargar PPTX con ${count} diapositivas`); downloadNote.textContent = `${count} lámina${count === 1 ? '' : 's'} preparada${count === 1 ? '' : 's'}.`; [downloadButton, downloadPptButton, presentButton].forEach(button => { button.disabled = !hasGeneratedLyrics; }); }
 function showSlide(index) { currentSlide = Math.max(0, Math.min(index, slides.length - 1)); const slide = slides[currentSlide]; const isTitle = Boolean(slide.reference && !slide.text); refEl.textContent = slide.reference; textEl.textContent = slide.text; versionEl.textContent = ''; card.classList.toggle('lyrics-only', !slide.reference); card.classList.toggle('title-only', isTitle); previousButton.disabled = currentSlide === 0; nextButton.disabled = currentSlide === slides.length - 1; renderDots(); requestAnimationFrame(() => { fitText(); publish(); }); }

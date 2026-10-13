@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'proyecta-cantos-presentacion';
+const TITLE_VISUAL_SCALE = 0.6;
 const card = document.querySelector('#output-card');
 const backgroundImage = document.querySelector('#output-background');
 const reference = document.querySelector('#output-reference');
@@ -28,12 +29,14 @@ function readStoredState() {
 }
 
 function fitText() {
-  const cardWidth = card.clientWidth || 640;
-  const sizes = [.047, .041, .036, .032, .028, .024]
-    .map(ratio => `${Math.max(10, Math.round(cardWidth * ratio))}px`);
-  for (const size of sizes) {
-    card.style.setProperty('--verse-size', size);
-    if (text.scrollHeight <= text.clientHeight) return;
+  if (!text.textContent.trim()) return;
+  const cardWidth = card.clientWidth || 640, lineCount = text.textContent.split('\n').filter(Boolean).length;
+  const preferred = cardWidth * (lineCount <= 2 ? .056 : .048), minimum = Math.max(16, Math.round(cardWidth * .018));
+  for (let size = Math.round(preferred); size >= minimum; size -= 1) {
+    card.style.setProperty('--verse-size', `${size}px`);
+    const fitsWidth = text.scrollWidth <= text.clientWidth + 1;
+    const fitsHeight = text.scrollHeight <= text.clientHeight + 1;
+    if (fitsWidth && fitsHeight) return;
   }
 }
 
@@ -52,14 +55,17 @@ function render() {
   const slide = slides[index];
   const appearance = state.appearance || {};
   const isClassic = appearance.font === 'cormorant';
-  const titleScale = Math.max(1, Math.min(2, Number(appearance.titleSize) / 100 || 1.2));
+  const titleScale = Math.max(1, Math.min(2, Number(appearance.titleSize) / 100 || 1.2)), titleVisualScale = titleScale * TITLE_VISUAL_SCALE;
 
   document.documentElement.style.setProperty('--background', appearance.background || '#05070b');
   document.documentElement.style.setProperty('--text', appearance.text || '#ffffff');
-  document.documentElement.style.setProperty('--reference', appearance.titleColor || '#f7b733');
+  document.documentElement.style.setProperty('--reference', appearance.titleColor || '#eea83b');
   reference.style.setProperty('--reference-min', `${Math.round(16 * titleScale)}px`);
   reference.style.setProperty('--reference-preferred', `${(1.65 * titleScale).toFixed(3)}vw`);
   reference.style.setProperty('--reference-max', `${Math.round(27.2 * titleScale)}px`);
+  card.style.setProperty('--title-size-min', `${Math.round(38.4 * titleVisualScale)}px`);
+  card.style.setProperty('--title-size-preferred', `${(6 * titleVisualScale).toFixed(3)}vw`);
+  card.style.setProperty('--title-size-max', `${Math.round(112 * titleVisualScale)}px`);
   document.documentElement.style.setProperty('--font', isClassic ? 'Cormorant Garamond, Georgia, serif' : 'Manrope, Avenir, sans-serif');
   card.style.setProperty('--verse-weight', isClassic ? '500' : '300');
   card.style.backgroundColor = appearance.transparent ? 'transparent' : (appearance.background || '#05070b');
